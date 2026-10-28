@@ -1,29 +1,32 @@
 # AI Video Editor
 
-Mobile-friendly React + Vite workspace for prompt-based image/video editing. Includes upload and preview, Hindi/English prompts, video-to-animation, clothing, background, style and image-to-video modes, duration/aspect settings, and result preview.
+Mobile-friendly React + Vite app for prompt-based video and photo edits in Hindi or English. It includes video-to-animation/restyling, clothing and background edits through video-to-video, image-to-video, duration/aspect settings, upload preview, and result preview.
 
-## Run locally
+## Run the app
 
-Use Node.js 20 or newer.
+Requires Node.js 20 or newer.
 
-1. Run `npm install`
-2. Copy `.env.example` to `.env`
-3. Run `npm run dev`
-4. In a second terminal run `npm run server`
+1. Clone/download this repository and open it in a terminal.
+2. Run `npm install`.
+3. Copy `.env.example` to `.env`.
+4. Start the frontend with `npm run dev`.
+5. In a second terminal, start the API server with `npm run server`.
 
-The Vite interface runs on port 5173 and proxies `/api` requests to port 3001.
+The Vite interface uses port 5173 and proxies `/api` requests to the API server on port 3001.
 
-## Real AI generation setup
+## Connect real AI generation (Runway)
 
-The interface and server endpoint are implemented, but actual video transformation requires a compatible AI provider and API key. No provider credentials are included. Generation returns a clear setup message until configured.
+1. Create/sign in to an API account at https://dev.runwayml.com/.
+2. Create an API key and make sure the API account has credits. API credits are separate from credits in the regular Runway app.
+3. Put the key in the server-side `.env` file as `RUNWAYML_API_SECRET=your_key`. Never paste the key into this chat, commit it to GitHub, or add it to frontend code.
+4. Restart `npm run server`. The app header should say `Runway AI connected`.
+5. Try a short, compressed MP4 (video-to-video) or a JPG/PNG (image-to-video). The current direct data-URI integration accepts media files up to 3.5 MB and video-to-video source clips up to 30 seconds. Keep clips short for faster processing and lower cost.
 
-Set `AI_PROVIDER_URL` and `AI_PROVIDER_KEY` in a private server-side `.env` file. The endpoint must accept multipart/form-data fields: `media` (file), `prompt`, `mode`, `duration` and `aspectRatio`. It must return JSON containing `resultUrl` or `statusUrl`. Many AI services use their own upload/queue/polling formats, so a provider-specific adapter may be required. Never put API keys in frontend code or commit them.
+The backend calls Runway's official `POST /v1/image_to_video` and `POST /v1/video_to_video` endpoints, then polls the task status until success/failure or a timeout. It returns the generated output URL to the UI. Runway charges API credits per generation; review its current pricing before use.
 
-## Scope and limits
+## Important limits
 
-- Responsive mobile-first editing workspace.
-- Image/video file picker and local preview; 350 MB upload limit on API.
-- Prompt templates, mode selection, and result display.
-- Provider adapter contract and health endpoint.
-- Provider-specific upload/job polling, paid credits, and APK packaging are not included until a provider is selected and configured.
-- Test with a configured provider before publishing. A successful frontend build does not prove external AI generation works.
+- Real generation requires a valid Runway API key and API credits; this repository cannot create those for you.
+- Current API integration uses base64 data URIs, so keep the uploaded image/video at or below 3.5 MB. Larger-file upload via Runway's separate asset-upload flow is not yet implemented.
+- The image-to-video endpoint is for photos; the video-to-video endpoint is for source video edits.
+- A successful web build confirms the app compiles, not that a paid external API key works. Test with your own API account before publishing.
