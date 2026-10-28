@@ -5,7 +5,7 @@ import multer from 'multer';
 
 const app = express();
 const port = Number(process.env.PORT || 3001);
-const MAX_RUNWAY_BYTES = 4 * 1024 * 1024;
+const MAX_RUNWAY_BYTES = 3.5 * 1024 * 1024;
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 350 * 1024 * 1024 } });
 app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }));
 app.use(express.json({ limit: '1mb' }));
@@ -29,7 +29,7 @@ app.post('/api/generate', upload.single('media'), async (req, res) => {
     const { prompt, mode, duration = '5', aspectRatio = '9:16' } = req.body;
     if (!prompt?.trim()) return res.status(400).json({ error: 'Prompt khaali hai. Changes likhein.' });
     if (!runwayKey()) return res.status(503).json({ error: 'Runway AI key abhi set nahi hai. README mein diye gaye setup steps follow karein.' });
-    if (req.file.size > MAX_RUNWAY_BYTES) return res.status(413).json({ error: 'Runway direct-data limit ke liye file 4 MB se chhoti honi chahiye. Chhota/compressed clip ya image use karein.' });
+    if (req.file.size > MAX_RUNWAY_BYTES) return res.status(413).json({ error: 'Runway direct-data limit ke liye file 3.5 MB ya usse chhoti honi chahiye. Chhota/compressed clip ya image use karein.' });
 
     const dataUri = `data:${req.file.mimetype || 'application/octet-stream'};base64,${req.file.buffer.toString('base64')}`;
     const isImage = req.file.mimetype?.startsWith('image/');
