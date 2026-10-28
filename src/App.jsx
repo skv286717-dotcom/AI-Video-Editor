@@ -24,7 +24,7 @@ export default function App(){
   useEffect(()=>{fetch('/api/health').then(r=>r.json()).then(d=>setApiReady(Boolean(d.providerConfigured))).catch(()=>setApiReady(false));},[]);
   useEffect(()=>{if(!file){setFileUrl('');return;}const u=URL.createObjectURL(file);setFileUrl(u);return()=>URL.revokeObjectURL(u);},[file]);
   const isImage=file?.type?.startsWith('image/');
-  const chooseFile=p=>{if(!p)return;if(!p.type.startsWith('image/')&&!p.type.startsWith('video/')){setError('Kripya image ya video file select karein.');return;}if(p.size>350*1024*1024){setError('File 350 MB se chhoti honi chahiye.');return;}setFile(p);setResultUrl('');setError('');setStatus('');};
+  const chooseFile=p=>{if(!p)return;if(!p.type.startsWith('image/')&&!p.type.startsWith('video/')){setError('Kripya image ya video file select karein.');return;}if(p.size>3.5*1024*1024){setError('Abhi Runway direct upload ke liye file 3.5 MB ya usse chhoti honi chahiye. Video compress karke try karein.');return;}setFile(p);setResultUrl('');setError('');setStatus('');};
   const runEdit=async()=>{if(!file||!prompt.trim()||busy)return;setBusy(true);setError('');setResultUrl('');setStatus('File upload ho rahi hai…');try{
     const body=new FormData();body.append('media',file);body.append('prompt',prompt.trim());body.append('mode',mode);body.append('duration',duration);body.append('aspectRatio',aspect);
     const response=await fetch('/api/generate',{method:'POST',body});const data=await response.json().catch(()=>({}));
@@ -35,10 +35,10 @@ export default function App(){
   }catch(e){setError(e.message||'Kuch galat hua. Dobara try karein.');setStatus('');}finally{setBusy(false);}};
   const downloadOriginal=()=>{if(!fileUrl||!file)return;const a=document.createElement('a');a.href=fileUrl;a.download=file.name;a.click();};
   return <main className="app-shell">
-    <header className="topbar"><a className="brand" href="#"><span className="brand-mark">✦</span><span>AI <b>Video Editor</b><small>CREATE • TRANSFORM • SHARE</small></span></a><span className="top-pill"><span className={apiReady?'dot ready':'dot'}/>{apiReady?'AI provider connected':'AI setup required'}</span></header>
+    <header className="topbar"><a className="brand" href="#"><span className="brand-mark">✦</span><span>AI <b>Video Editor</b><small>CREATE • TRANSFORM • SHARE</small></span></a><span className="top-pill"><span className={apiReady?'dot ready':'dot'}/>{apiReady?'Runway AI connected':'Runway setup required'}</span></header>
     <section className="hero"><div className="eyebrow">✦ PROMPT-BASED CREATIVE STUDIO</div><h1>Apni video ko <span>naya roop</span> dein.</h1><p>Video, photo, animation, outfit aur background — apna idea Hindi ya English mein likhein.</p></section>
     <div className="workspace"><section className="panel">
-      <div className="section-heading"><div><span className="step">01</span><h2>Media upload karein</h2></div><span className="muted">Max 350 MB</span></div>
+      <div className="section-heading"><div><span className="step">01</span><h2>Media upload karein</h2></div><span className="muted">Max 3.5 MB</span></div>
       <label className="dropzone" htmlFor="media-file">{fileUrl?<div className="preview-wrap">{isImage?<img src={fileUrl} alt="Selected preview"/>:<video src={fileUrl} controls playsInline/>}<span className="file-chip">{isImage?'IMAGE':'VIDEO'} · {(file.size/(1024*1024)).toFixed(1)} MB</span></div>:<><span className="upload-icon">↑</span><strong>Photo ya video choose karein</strong><span>Tap karke gallery / files kholein</span><small>MP4, MOV, WEBM, JPG, PNG, WEBP</small></>}</label>
       <input id="media-file" type="file" accept="video/*,image/*" onChange={e=>chooseFile(e.target.files?.[0])} hidden/>
       {file&&<div className="file-row"><span className="file-name">📎 {file.name}</span><button className="text-button" onClick={()=>{setFile(null);setResultUrl('');}}>Remove</button></div>}
